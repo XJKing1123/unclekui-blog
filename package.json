@@ -1,0 +1,27 @@
+{
+  "name": "flutter-field-notes",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "astro dev",
+    "check": "astro check",
+    "build": "astro build && pagefind --site dist",
+    "preview": "astro preview",
+    "astro": "astro"
+  },
+  "dependencies": {
+    "@astrojs/rss": "latest",
+    "@astrojs/markdown-remark": "latest",
+    "@astrojs/sitemap": "latest",
+    "@pagefind/default-ui": "latest",
+    "astro": "latest",
+    "@lucide/astro": "latest",
+    "mermaid": "latest"
+  },
+  "devDependencies": {
+    "@astrojs/check": "latest",
+    "pagefind": "latest",
+    "typescript": ">=6.0.0 <7.0.0"
+  }
+}

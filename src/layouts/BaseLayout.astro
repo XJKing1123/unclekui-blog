@@ -1,0 +1,150 @@
+---
+import { Search, Moon, Sun, Monitor, Palette } from '@lucide/astro';
+import { SITE } from '../config/site';
+import '../styles/global.css';
+
+interface Props {
+  title?: string;
+  description?: string;
+  image?: string;
+  canonical?: string;
+  type?: 'website' | 'article';
+  publishedTime?: Date;
+  updatedTime?: Date;
+}
+
+const {
+  title,
+  description = SITE.description,
+  image = '/og-default.png',
+  canonical,
+  type = 'website',
+  publishedTime,
+  updatedTime,
+} = Astro.props;
+
+const pageTitle = title ? `${title} · ${SITE.shortTitle}` : SITE.title;
+const canonicalUrl = canonical ? new URL(canonical, Astro.site) : new URL(Astro.url.pathname, Astro.site);
+const imageUrl = new URL(image, Astro.site);
+const currentPath = Astro.url.pathname;
+---
+
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width" />
+    <meta name="generator" content={Astro.generator} />
+    <meta name="description" content={description} />
+    <meta name="theme-color" content="#10a37f" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="canonical" href={canonicalUrl} />
+    <link rel="alternate" type="application/rss+xml" title={SITE.title} href={new URL('/rss.xml', Astro.site)} />
+    <meta property="og:type" content={type} />
+    <meta property="og:site_name" content={SITE.title} />
+    <meta property="og:title" content={pageTitle} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonicalUrl} />
+    <meta property="og:image" content={imageUrl} />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={pageTitle} />
+    <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={imageUrl} />
+    {publishedTime && <meta property="article:published_time" content={publishedTime.toISOString()} />}
+    {updatedTime && <meta property="article:modified_time" content={updatedTime.toISOString()} />}
+    <title>{pageTitle}</title>
+    <script is:inline>
+      (() => {
+        const saved = localStorage.getItem('theme') || 'system';
+        const dark = saved === 'dark' || (saved === 'system' && matchMedia('(prefers-color-scheme: dark)').matches);
+        document.documentElement.dataset.theme = dark ? 'dark' : 'light';
+        document.documentElement.dataset.themePreference = saved;
+      })();
+    </script>
+  </head>
+  <body>
+    <header class="site-header">
+      <div class="container header-inner">
+        <a class="brand" href="/" aria-label={`${SITE.title} 首页`}>
+          <span class="brand-mark" aria-hidden="true">奎</span>
+          <span>{SITE.shortTitle}</span>
+        </a>
+        <nav class="main-nav" aria-label="主导航">
+          {SITE.nav.map((item) => (
+            <a href={item.href} aria-current={currentPath === item.href ? 'page' : undefined}>{item.label}</a>
+          ))}
+        </nav>
+        <div class="header-actions">
+          <a class="icon-link" href="/search" aria-label="搜索文章" title="搜索">
+            <Search size={17} stroke-width={1.8} />
+          </a>
+          <div class="theme-picker">
+            <button class="theme-button" id="theme-trigger" type="button" aria-label="选择主题" title="主题" aria-expanded="false">
+              <Palette size={17} stroke-width={1.8} />
+            </button>
+            <div class="theme-menu" id="theme-menu" role="radiogroup" aria-label="主题模式">
+              <button class="theme-option" type="button" role="radio" data-theme-value="light">
+                <Sun size={16} /> 浅色
+              </button>
+              <button class="theme-option" type="button" role="radio" data-theme-value="dark">
+                <Moon size={16} /> 深色
+              </button>
+              <button class="theme-option" type="button" role="radio" data-theme-value="system">
+                <Monitor size={16} /> 跟随系统
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </header>
+    <main><slot /></main>
+    <footer class="site-footer">
+      <div class="container footer-inner">
+        <div>© {new Date().getFullYear()} {SITE.author.name} · 用事实、代码与测量记录工程实践</div>
+      </div>
+    </footer>
+    <script>
+      const trigger = document.querySelector<HTMLButtonElement>('#theme-trigger');
+      const menu = document.querySelector<HTMLElement>('#theme-menu');
+      const options = document.querySelectorAll<HTMLButtonElement>('[data-theme-value]');
+      const media = matchMedia('(prefers-color-scheme: dark)');
+
+      function applyTheme(value: string) {
+        const previousTheme = document.documentElement.dataset.theme;
+        const dark = value === 'dark' || (value === 'system' && media.matches);
+        document.documentElement.dataset.theme = dark ? 'dark' : 'light';
+        document.documentElement.dataset.themePreference = value;
+        localStorage.setItem('theme', value);
+        options.forEach((option) => option.setAttribute('aria-checked', String(option.dataset.themeValue === value)));
+        if (previousTheme && previousTheme !== document.documentElement.dataset.theme) {
+          dispatchEvent(new CustomEvent('site-theme-change'));
+        }
+      }
+
+      trigger?.addEventListener('click', () => {
+        const open = menu?.dataset.open !== 'true';
+        if (menu) menu.dataset.open = String(open);
+        trigger.setAttribute('aria-expanded', String(open));
+      });
+
+      options.forEach((option) => option.addEventListener('click', () => {
+        applyTheme(option.dataset.themeValue || 'system');
+        if (menu) menu.dataset.open = 'false';
+        trigger?.setAttribute('aria-expanded', 'false');
+      }));
+
+      media.addEventListener('change', () => {
+        if ((localStorage.getItem('theme') || 'system') === 'system') applyTheme('system');
+      });
+
+      document.addEventListener('click', (event) => {
+        if (!menu?.contains(event.target as Node) && !trigger?.contains(event.target as Node)) {
+          menu?.setAttribute('data-open', 'false');
+          trigger?.setAttribute('aria-expanded', 'false');
+        }
+      });
+
+      applyTheme(localStorage.getItem('theme') || 'system');
+    </script>
+  </body>
+</html>

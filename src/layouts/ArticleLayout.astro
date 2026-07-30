@@ -1,0 +1,173 @@
+---
+import BaseLayout from './BaseLayout.astro';
+import TagChip from '../components/TagChip.astro';
+import { formatDate, getSeriesMeta, readingMinutes, type Post } from '../lib/content';
+import { SITE } from '../config/site';
+
+interface Props {
+  post: Post;
+  headings: Array<{ depth: number; slug: string; text: string }>;
+  previous?: Post;
+  next?: Post;
+}
+
+const { post, headings, previous, next } = Astro.props;
+const toc = headings.filter((heading) => heading.depth === 2 || heading.depth === 3);
+const series = getSeriesMeta(post.data.series);
+const canonical = `/posts/${post.data.slug}`;
+const jsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'TechArticle',
+  headline: post.data.title,
+  description: post.data.description,
+  datePublished: post.data.publishDate.toISOString(),
+  dateModified: post.data.updatedDate.toISOString(),
+  inLanguage: 'zh-CN',
+  author: { '@type': 'Person', name: SITE.author.name },
+  mainEntityOfPage: new URL(canonical, Astro.site).toString(),
+};
+---
+
+<BaseLayout
+  title={post.data.title}
+  description={post.data.description}
+  canonical={canonical}
+  type="article"
+  publishedTime={post.data.publishDate}
+  updatedTime={post.data.updatedDate}
+>
+  <script is:inline type="application/ld+json" set:html={JSON.stringify(jsonLd)} />
+  <div class="article-progress" id="article-progress" aria-hidden="true"></div>
+  <header class="article-header">
+    <div class="article-header-inner">
+      <div class="eyebrow"><a href={`/series/${post.data.series}`}>{series.name}</a></div>
+      <h1>{post.data.title}</h1>
+      <p class="article-description">{post.data.description}</p>
+      <div class="article-meta">
+        <span>发布于 <time datetime={post.data.publishDate.toISOString()}>{formatDate(post.data.publishDate)}</time></span>
+        <span>更新于 <time datetime={post.data.updatedDate.toISOString()}>{formatDate(post.data.updatedDate)}</time></span>
+        <span>{readingMinutes(post.body)} 分钟阅读</span>
+      </div>
+      <div class="tags" style="margin-top: 1rem">
+        {post.data.tags.map((tag) => <TagChip tag={tag} />)}
+      </div>
+    </div>
+  </header>
+  <div class="article-layout">
+    <article class="article-body" data-pagefind-body>
+      {toc.length > 0 && (
+        <details class="mobile-toc">
+          <summary>本文目录</summary>
+          <nav>
+            {toc.map((heading) => <a href={`#${heading.slug}`}>{heading.text}</a>)}
+          </nav>
+        </details>
+      )}
+      <slot />
+      <nav class="post-navigation" aria-label="相邻文章">
+        {previous ? (
+          <a href={`/posts/${previous.data.slug}`}>
+            <small>上一篇</small><span>{previous.data.title}</span>
+          </a>
+        ) : <span />}
+        {next && (
+          <a href={`/posts/${next.data.slug}`}>
+            <small>下一篇</small><span>{next.data.title}</span>
+          </a>
+        )}
+      </nav>
+    </article>
+    {toc.length > 0 && (
+      <aside class="article-toc" aria-label="文章目录">
+        <h2>本文目录</h2>
+        <nav>
+          {toc.map((heading) => <a data-depth={heading.depth} href={`#${heading.slug}`}>{heading.text}</a>)}
+        </nav>
+      </aside>
+    )}
+  </div>
+  <script>
+    import mermaid from 'mermaid';
+
+    async function renderMermaid() {
+      const blocks = document.querySelectorAll<HTMLPreElement>('pre[data-language="mermaid"]');
+      const rendered = document.querySelectorAll<HTMLElement>('.mermaid-frame[data-mermaid-source]');
+      if (!blocks.length && !rendered.length) return;
+      const dark = document.documentElement.dataset.theme === 'dark';
+      mermaid.initialize({ startOnLoad: false, theme: dark ? 'dark' : 'neutral', securityLevel: 'strict' });
+
+      const targets = [
+        ...[...blocks].map((pre) => ({ source: pre.textContent || '', element: pre })),
+        ...[...rendered].map((frame) => ({ source: frame.dataset.mermaidSource || '', element: frame })),
+      ];
+
+      for (const [index, target] of targets.entries()) {
+        const frame = document.createElement('div');
+        frame.className = 'mermaid-frame';
+        frame.dataset.mermaidSource = target.source;
+        try {
+          const { svg } = await mermaid.render(`mermaid-${index}-${Date.now()}`, target.source);
+          frame.innerHTML = svg;
+        } catch {
+          frame.classList.add('mermaid-error');
+          frame.textContent = `图表渲染失败，Mermaid 源码：\n\n${target.source}`;
+        }
+        target.element.replaceWith(frame);
+      }
+    }
+
+    function installCodeCopy() {
+      document.querySelectorAll<HTMLPreElement>('.article-body pre').forEach((pre) => {
+        const code = pre.querySelector('code');
+        const language = pre.dataset.language || [...(code?.classList ?? [])].find((item) => item.startsWith('language-'))?.replace('language-', '') || 'code';
+        pre.dataset.language = language;
+        if (language === 'mermaid') return;
+        const button = document.createElement('button');
+        button.className = 'copy-code';
+        button.type = 'button';
+        button.textContent = '复制';
+        button.title = '复制代码';
+        button.addEventListener('click', async () => {
+          await navigator.clipboard.writeText(code?.textContent || '');
+          button.textContent = '已复制';
+          setTimeout(() => button.textContent = '复制', 1200);
+        });
+        pre.append(button);
+      });
+    }
+
+    function installReadingProgress() {
+      const progress = document.querySelector<HTMLElement>('#article-progress');
+      const article = document.querySelector<HTMLElement>('.article-body');
+      if (!progress || !article) return;
+      const update = () => {
+        const start = article.offsetTop;
+        const distance = article.offsetHeight - innerHeight;
+        const value = distance <= 0 ? 1 : Math.min(1, Math.max(0, (scrollY - start) / distance));
+        progress.style.width = `${value * 100}%`;
+      };
+      addEventListener('scroll', update, { passive: true });
+      addEventListener('resize', update);
+      update();
+    }
+
+    function installTocObserver() {
+      const links = [...document.querySelectorAll<HTMLAnchorElement>('.article-toc a')];
+      const headings = links.map((link) => document.getElementById(decodeURIComponent(link.hash.slice(1)))).filter(Boolean) as HTMLElement[];
+      if (!headings.length) return;
+      const observer = new IntersectionObserver((entries) => {
+        const visible = entries.find((entry) => entry.isIntersecting);
+        if (!visible) return;
+        links.forEach((link) => link.removeAttribute('aria-current'));
+        document.querySelector<HTMLAnchorElement>(`.article-toc a[href="#${CSS.escape(visible.target.id)}"]`)?.setAttribute('aria-current', 'true');
+      }, { rootMargin: '-20% 0px -70% 0px' });
+      headings.forEach((heading) => observer.observe(heading));
+    }
+
+    installCodeCopy();
+    renderMermaid();
+    addEventListener('site-theme-change', renderMermaid);
+    installReadingProgress();
+    installTocObserver();
+  </script>
+</BaseLayout>

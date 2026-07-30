@@ -1,0 +1,26 @@
+---
+import type { GetStaticPaths } from 'astro';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { SERIES } from '../../config/site';
+import { formatDate, getPublishedPosts, getSeriesMeta } from '../../lib/content';
+
+export const getStaticPaths = (async () => {
+  const posts = await getPublishedPosts();
+  return Object.keys(SERIES).map((series) => ({
+    params: { series },
+    props: { posts: posts.filter((post) => post.data.series === series).sort((a, b) => a.data.order - b.data.order) },
+  }));
+}) satisfies GetStaticPaths;
+
+const { series } = Astro.params;
+const { posts } = Astro.props;
+const meta = getSeriesMeta(series!);
+---
+<BaseLayout title={meta.name} description={meta.description}>
+  <header class="page-header"><div class="container"><p class="eyebrow">Series · {posts.length} articles</p><h1>{meta.name}</h1><p>{meta.description}</p></div></header>
+  <div class="container post-list">
+    {posts.map((post, index) => (
+      <article class="post-row"><time datetime={post.data.publishDate.toISOString()}>{String(index + 1).padStart(2, '0')}</time><h2><a href={`/posts/${post.data.slug}`}>{post.data.title}</a></h2><span class="series-label">{formatDate(post.data.publishDate)}</span></article>
+    ))}
+  </div>
+</BaseLayout>

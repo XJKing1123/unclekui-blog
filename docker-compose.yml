@@ -1,0 +1,16 @@
+services:
+  blog:
+    image: flutter-field-notes:${IMAGE_TAG:-latest}
+    build:
+      context: .
+      args:
+        SITE_URL: ${SITE_URL:-http://localhost}
+    restart: unless-stopped
+    ports:
+      - "${BLOG_PORT:-80}:80"
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://127.0.0.1/healthz"]
+      interval: 30s
+      timeout: 3s
+      retries: 3
+      start_period: 5s

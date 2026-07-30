@@ -1,0 +1,24 @@
+---
+import type { GetStaticPaths } from 'astro';
+import { render } from 'astro:content';
+import ArticleLayout from '../../layouts/ArticleLayout.astro';
+import { getPublishedPosts } from '../../lib/content';
+
+export const getStaticPaths = (async () => {
+  const posts = await getPublishedPosts();
+  return posts.map((post) => {
+    const inSeries = posts
+      .filter((candidate) => candidate.data.series === post.data.series)
+      .sort((a, b) => a.data.order - b.data.order);
+    const index = inSeries.findIndex((candidate) => candidate.id === post.id);
+    return {
+      params: { slug: post.data.slug },
+      props: { post, previous: inSeries[index - 1], next: inSeries[index + 1] },
+    };
+  });
+}) satisfies GetStaticPaths;
+
+const { post, previous, next } = Astro.props;
+const { Content, headings } = await render(post);
+---
+<ArticleLayout post={post} headings={headings} previous={previous} next={next}><Content /></ArticleLayout>

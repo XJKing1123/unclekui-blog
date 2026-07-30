@@ -1,0 +1,22 @@
+---
+import type { Post } from '../lib/content';
+import { formatDate, getSeriesMeta, readingMinutes } from '../lib/content';
+import TagChip from './TagChip.astro';
+
+interface Props { post: Post }
+const { post } = Astro.props;
+const meta = getSeriesMeta(post.data.series);
+---
+
+<article class="post-card">
+  <div class="eyebrow">{meta.name}</div>
+  <h3><a href={`/posts/${post.data.slug}`}>{post.data.title}</a></h3>
+  <p>{post.data.description}</p>
+  <div class="tags" style="margin-top: 1rem">
+    {post.data.tags.slice(0, 3).map((tag) => <TagChip tag={tag} />)}
+  </div>
+  <div class="post-meta">
+    <time datetime={post.data.publishDate.toISOString()}>{formatDate(post.data.publishDate)}</time>
+    <span>{readingMinutes(post.body)} 分钟阅读</span>
+  </div>
+</article>

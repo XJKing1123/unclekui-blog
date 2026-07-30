@@ -1,0 +1,20 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+---
+<BaseLayout title="搜索" description="全文搜索奎叔技术笔记中的 Flutter、iOS、React 与 Web3 技术文章。">
+  <header class="page-header"><div class="container"><p class="eyebrow">Search</p><h1>搜索</h1><p>搜索文章标题、正文、标签和专栏内容。</p></div></header>
+  <div class="container search-shell">
+    <div id="search"></div>
+    <p class="search-dev-note" id="search-dev-note">搜索索引在生产构建后生成，本地开发模式请先运行 <code>npm run build</code>。</p>
+  </div>
+  <script>
+    import { PagefindUI } from '@pagefind/default-ui';
+    import '@pagefind/default-ui/css/ui.css';
+    try {
+      new PagefindUI({ element: '#search', showSubResults: true, resetStyles: false, translations: { placeholder: '搜索文章…', clear_search: '清除', load_more: '加载更多', search_label: '站内搜索', filters_label: '筛选', zero_results: '没有找到 [SEARCH_TERM] 的结果' } });
+      document.querySelector('#search-dev-note')?.remove();
+    } catch {
+      // Development mode has no generated Pagefind bundle.
+    }
+  </script>
+</BaseLayout>

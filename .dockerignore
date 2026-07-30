@@ -1,0 +1,9 @@
+node_modules
+dist
+.astro
+.git
+.deploy
+qa_render*
+*.docx
+*.pdf
+.DS_Store
