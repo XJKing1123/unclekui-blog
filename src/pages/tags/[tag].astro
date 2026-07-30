@@ -1,7 +1,7 @@
 ---
 import type { GetStaticPaths } from 'astro';
 import BaseLayout from '../../layouts/BaseLayout.astro';
-import { formatDate, getPublishedPosts, getSeriesMeta } from '../../lib/content';
+import { getColumnKey, getPublishedPosts, getSeriesMeta } from '../../lib/content';
 
 export const getStaticPaths = (async () => {
   const posts = await getPublishedPosts();
@@ -15,6 +15,6 @@ const { posts } = Astro.props;
 <BaseLayout title={`标签：${tag}`} description={`包含“${tag}”标签的 Flutter 技术文章。`}>
   <header class="page-header"><div class="container"><p class="eyebrow">Tag · {posts.length} articles</p><h1>{tag}</h1></div></header>
   <div class="container post-list">
-    {posts.map((post) => <article class="post-row"><time>{formatDate(post.data.publishDate)}</time><h2><a href={`/posts/${post.data.slug}`}>{post.data.title}</a></h2><a class="series-label" href={`/series/${post.data.series}`}>{getSeriesMeta(post.data.series).name}</a></article>)}
+    {posts.map((post) => <article class="post-row post-row--compact"><h2><a href={`/posts/${post.data.slug}`}>{post.data.title}</a></h2><a class="series-label" href={`/series/${getColumnKey(post.data.series)}`}>{getSeriesMeta(post.data.series).name}</a></article>)}
   </div>
 </BaseLayout>

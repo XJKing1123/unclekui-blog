@@ -1,0 +1,42 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { Mail, Search, BookOpen } from '@lucide/astro';
+import { SITE } from '../config/site';
+import { getPublishedPosts } from '../lib/content';
+
+const posts = await getPublishedPosts();
+---
+
+<BaseLayout title="关于" description={`关于 ${SITE.author.name} 与奎叔技术笔记的内容原则、技术方向和联系方式。`}>
+  <header class="page-header">
+    <div class="container"><p class="eyebrow">About</p><h1>关于本站</h1><p>记录可验证、可复现、能进入真实工程现场的技术结论。</p></div>
+  </header>
+  <div class="reading-container about-page">
+    <section class="about-profile">
+      <img src={SITE.author.avatar} alt={`${SITE.author.name} 的头像`} width="88" height="88" />
+      <div><h2>{SITE.author.name}</h2><p>{SITE.author.role}</p><p>{SITE.author.bio}</p></div>
+    </section>
+
+    <section class="about-section">
+      <h2>写作原则</h2>
+      <p>本站关注 Flutter、iOS、React、Web3 与软件工程实践。文章不仅说明 API 如何使用，也会交代核心对象、执行流程、生命周期、边界条件与方案代价。</p>
+      <ul>
+        <li>稳定公开契约与特定版本内部实现分开描述。</li>
+        <li>性能结论以目标设备上的 Profile 或 Release 测量为依据。</li>
+        <li>示例覆盖异常、取消、竞态、资源释放和跨平台差异。</li>
+        <li>发现错误或版本变化后修订正文，并更新文章日期。</li>
+      </ul>
+    </section>
+
+    <section class="about-section">
+      <h2>从哪里开始</h2>
+      <div class="about-links">
+        <a href="/knowledge-map"><BookOpen size={18} aria-hidden="true" /><span><strong>知识地图</strong><small>按前置关系建立学习路径</small></span></a>
+        <a href="/search"><Search size={18} aria-hidden="true" /><span><strong>全文搜索</strong><small>定位具体问题和技术概念</small></span></a>
+        <a href={`mailto:${SITE.author.email}`}><Mail size={18} aria-hidden="true" /><span><strong>勘误与联系</strong><small>{SITE.author.email}</small></span></a>
+      </div>
+    </section>
+
+    <aside class="about-note">当前共发布 <strong>{posts.length}</strong> 篇深度文章。转载或引用时请保留作者与原文链接；发现技术错误，欢迎通过邮件提供复现环境和相关版本。</aside>
+  </div>
+</BaseLayout>

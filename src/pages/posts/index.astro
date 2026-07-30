@@ -1,26 +1,23 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import TagChip from '../../components/TagChip.astro';
-import { formatDate, getPublishedPosts, getSeriesMeta, readingMinutes } from '../../lib/content';
+import { getColumnKey, getPublishedPosts, getSeriesMeta } from '../../lib/content';
 const posts = await getPublishedPosts();
-const seriesCount = new Set(posts.map((post) => post.data.series)).size;
+const seriesCount = new Set(posts.map((post) => getColumnKey(post.data.series))).size;
 ---
 <BaseLayout title="全部文章" description="奎叔技术笔记的全部 Flutter、iOS、React 与 Web3 技术文章。">
   <header class="page-header"><div class="container"><p class="eyebrow">Archive</p><h1>全部文章</h1><p>按发布时间浏览框架原理、性能、架构、安全与稳定性文章。</p><div class="archive-summary"><span><strong>{posts.length}</strong> 篇深度文章</span><span><strong>{seriesCount}</strong> 个技术专栏</span></div></div></header>
   <div class="container post-list">
     {posts.map((post) => (
-      <article class="post-row">
-        <div class="post-row-date"><span>发布</span><time datetime={post.data.publishDate.toISOString()}>{formatDate(post.data.publishDate)}</time></div>
+      <article class="post-row post-row--archive">
         <div class="post-row-content">
           <h2><a href={`/posts/${post.data.slug}`}>{post.data.title}</a></h2>
           <p>{post.data.description}</p>
           <div class="post-row-footer">
-            <span>{readingMinutes(post.body)} 分钟阅读</span>
-            <span>更新于 {formatDate(post.data.updatedDate)}</span>
             <div class="tags">{post.data.tags.slice(0, 2).map((tag) => <TagChip tag={tag} />)}</div>
           </div>
         </div>
-        <a class="series-label" href={`/series/${post.data.series}`}>{getSeriesMeta(post.data.series).name}</a>
+        <a class="series-label" href={`/series/${getColumnKey(post.data.series)}`}>{getSeriesMeta(post.data.series).name}</a>
       </article>
     ))}
   </div>

@@ -1,5 +1,5 @@
 ---
-import { Search, Moon, Sun, Monitor, Palette } from '@lucide/astro';
+import { Menu, Search, Moon, Sun, Monitor, Palette } from '@lucide/astro';
 import { SITE } from '../config/site';
 import '../styles/global.css';
 
@@ -27,6 +27,7 @@ const pageTitle = title ? `${title} · ${SITE.shortTitle}` : SITE.title;
 const canonicalUrl = canonical ? new URL(canonical, Astro.site) : new URL(Astro.url.pathname, Astro.site);
 const imageUrl = new URL(image, Astro.site);
 const currentPath = Astro.url.pathname;
+const isCurrentNavItem = (href: string) => href === '/' ? currentPath === '/' : currentPath === href || currentPath.startsWith(`${href}/`);
 ---
 
 <!doctype html>
@@ -39,7 +40,6 @@ const currentPath = Astro.url.pathname;
     <meta name="theme-color" content="#10a37f" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <link rel="canonical" href={canonicalUrl} />
-    <link rel="alternate" type="application/rss+xml" title={SITE.title} href={new URL('/rss.xml', Astro.site)} />
     <meta property="og:type" content={type} />
     <meta property="og:site_name" content={SITE.title} />
     <meta property="og:title" content={pageTitle} />
@@ -69,9 +69,9 @@ const currentPath = Astro.url.pathname;
           <span class="brand-mark" aria-hidden="true">奎</span>
           <span>{SITE.shortTitle}</span>
         </a>
-        <nav class="main-nav" aria-label="主导航">
+        <nav class="main-nav" id="main-nav" aria-label="主导航">
           {SITE.nav.map((item) => (
-            <a href={item.href} aria-current={currentPath === item.href ? 'page' : undefined}>{item.label}</a>
+            <a href={item.href} aria-current={isCurrentNavItem(item.href) ? 'page' : undefined}>{item.label}</a>
           ))}
         </nav>
         <div class="header-actions">
@@ -94,6 +94,9 @@ const currentPath = Astro.url.pathname;
               </button>
             </div>
           </div>
+          <button class="nav-toggle" id="nav-toggle" type="button" aria-label="打开导航" aria-controls="main-nav" aria-expanded="false">
+            <Menu size={19} stroke-width={1.8} />
+          </button>
         </div>
       </div>
     </header>
@@ -101,6 +104,11 @@ const currentPath = Astro.url.pathname;
     <footer class="site-footer">
       <div class="container footer-inner">
         <div>© {new Date().getFullYear()} {SITE.author.name} · 用事实、代码与测量记录工程实践</div>
+        <nav class="footer-nav" aria-label="页脚导航">
+          <a href="/tags">标签</a>
+          <a href="/about">关于</a>
+          <a href={`mailto:${SITE.author.email}`}>联系</a>
+        </nav>
       </div>
     </footer>
     <script>
@@ -108,6 +116,8 @@ const currentPath = Astro.url.pathname;
       const menu = document.querySelector<HTMLElement>('#theme-menu');
       const options = document.querySelectorAll<HTMLButtonElement>('[data-theme-value]');
       const media = matchMedia('(prefers-color-scheme: dark)');
+      const navToggle = document.querySelector<HTMLButtonElement>('#nav-toggle');
+      const mainNav = document.querySelector<HTMLElement>('#main-nav');
 
       function applyTheme(value: string) {
         const previousTheme = document.documentElement.dataset.theme;
@@ -142,6 +152,18 @@ const currentPath = Astro.url.pathname;
           menu?.setAttribute('data-open', 'false');
           trigger?.setAttribute('aria-expanded', 'false');
         }
+        if (!mainNav?.contains(event.target as Node) && !navToggle?.contains(event.target as Node)) {
+          mainNav?.removeAttribute('data-open');
+          navToggle?.setAttribute('aria-expanded', 'false');
+          navToggle?.setAttribute('aria-label', '打开导航');
+        }
+      });
+
+      navToggle?.addEventListener('click', () => {
+        const open = mainNav?.dataset.open !== 'true';
+        mainNav?.setAttribute('data-open', String(open));
+        navToggle.setAttribute('aria-expanded', String(open));
+        navToggle.setAttribute('aria-label', open ? '关闭导航' : '打开导航');
       });
 
       applyTheme(localStorage.getItem('theme') || 'system');

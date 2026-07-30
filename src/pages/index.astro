@@ -3,8 +3,8 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 import PostCard from '../components/PostCard.astro';
 import TagChip from '../components/TagChip.astro';
 import { Mail } from '@lucide/astro';
-import { SITE, SERIES } from '../config/site';
-import { getPublishedPosts } from '../lib/content';
+import { COLUMNS, SITE } from '../config/site';
+import { getColumnKey, getPublishedPosts } from '../lib/content';
 
 const posts = await getPublishedPosts();
 const latest = posts.slice(0, 6);
@@ -12,7 +12,10 @@ const tagCounts = new Map<string, number>();
 posts.forEach((post) => post.data.tags.forEach((tag) => tagCounts.set(tag, (tagCounts.get(tag) ?? 0) + 1)));
 const popularTags = [...tagCounts.entries()].sort((a, b) => b[1] - a[1]).slice(0, 10);
 const seriesCounts = new Map<string, number>();
-posts.forEach((post) => seriesCounts.set(post.data.series, (seriesCounts.get(post.data.series) ?? 0) + 1));
+posts.forEach((post) => {
+  const column = getColumnKey(post.data.series);
+  seriesCounts.set(column, (seriesCounts.get(column) ?? 0) + 1);
+});
 ---
 
 <BaseLayout>
@@ -24,7 +27,7 @@ posts.forEach((post) => seriesCounts.set(post.data.series, (seriesCounts.get(pos
         <p class="home-lead">从运行机制、性能测量到架构与安全，用可验证的代码和因果链记录 Flutter、iOS、React 与 Web3 实践。</p>
         <div class="home-metrics" aria-label="内容概览">
           <div class="home-metric"><strong>{posts.length}</strong><span>深度文章</span></div>
-          <div class="home-metric"><strong>{Object.keys(SERIES).length}</strong><span>技术专栏</span></div>
+          <div class="home-metric"><strong>{Object.keys(COLUMNS).length}</strong><span>技术专栏</span></div>
           <div class="home-metric"><strong>{tagCounts.size}</strong><span>知识标签</span></div>
         </div>
       </div>
@@ -47,7 +50,7 @@ posts.forEach((post) => seriesCounts.set(post.data.series, (seriesCounts.get(pos
   <section class="container home-section">
     <div class="section-heading"><h2>技术专栏</h2><a href="/series">按顺序阅读</a></div>
     <div class="series-grid">
-      {Object.entries(SERIES).map(([key, series]) => (
+      {Object.entries(COLUMNS).map(([key, series]) => (
         <a class="series-card" href={`/series/${key}`}>
           <div class="eyebrow">Series</div><h3>{series.name}</h3><p>{series.description}</p>
           <span class="series-count">{seriesCounts.get(key) ?? 0} 篇文章</span>

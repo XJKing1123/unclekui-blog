@@ -11,9 +11,10 @@ export const SITE = {
   },
   nav: [
     { label: '首页', href: '/' },
-    { label: '文章', href: '/posts' },
     { label: '专栏', href: '/series' },
-    { label: '标签', href: '/tags' },
+    { label: '知识地图', href: '/knowledge-map' },
+    { label: '文章', href: '/posts' },
+    { label: '关于', href: '/about' },
   ],
 } as const;
 
@@ -46,6 +47,10 @@ export const SERIES = {
     name: '框架原理',
     description: '从三棵树、渲染管线到混合开发，理解 Flutter 的运行机制。',
   },
+  'rendering-painting': {
+    name: '渲染与绘制',
+    description: '深入帧调度、布局、绘制、图层合成与栅格化，建立可验证的 Flutter 渲染性能模型。',
+  },
   'performance-reliability': {
     name: '性能与稳定性',
     description: '用指标、Trace 和故障闭环建设可观测、可恢复的客户端。',
@@ -61,3 +66,15 @@ export const SERIES = {
 } as const;
 
 export type SeriesKey = keyof typeof SERIES;
+
+export const COLUMNS = {
+  flutter: {
+    name: 'Flutter 工程实践',
+    description: '深入 Flutter 框架原理、状态与数据流、性能、架构、安全和工程治理。',
+  },
+  ios: SERIES.ios,
+  react: SERIES.react,
+  web3: SERIES.web3,
+} as const;
+
+export type ColumnKey = keyof typeof COLUMNS;

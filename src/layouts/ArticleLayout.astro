@@ -1,7 +1,7 @@
 ---
 import BaseLayout from './BaseLayout.astro';
 import TagChip from '../components/TagChip.astro';
-import { formatDate, getSeriesMeta, readingMinutes, type Post } from '../lib/content';
+import { getColumnKey, getSeriesMeta, type Post } from '../lib/content';
 import { SITE } from '../config/site';
 
 interface Props {
@@ -40,14 +40,9 @@ const jsonLd = {
   <div class="article-progress" id="article-progress" aria-hidden="true"></div>
   <header class="article-header">
     <div class="article-header-inner">
-      <div class="eyebrow"><a href={`/series/${post.data.series}`}>{series.name}</a></div>
+      <div class="eyebrow"><a href={`/series/${getColumnKey(post.data.series)}`}>{series.name}</a></div>
       <h1>{post.data.title}</h1>
       <p class="article-description">{post.data.description}</p>
-      <div class="article-meta">
-        <span>发布于 <time datetime={post.data.publishDate.toISOString()}>{formatDate(post.data.publishDate)}</time></span>
-        <span>更新于 <time datetime={post.data.updatedDate.toISOString()}>{formatDate(post.data.updatedDate)}</time></span>
-        <span>{readingMinutes(post.body)} 分钟阅读</span>
-      </div>
       <div class="tags" style="margin-top: 1rem">
         {post.data.tags.map((tag) => <TagChip tag={tag} />)}
       </div>

@@ -19,7 +19,17 @@ pnpm run build
 pnpm run preview
 ```
 
-站点资料统一在 `src/config/site.ts` 修改。发布文章需要补齐 Frontmatter，并将文件名加入 `src/content.config.ts` 的内容集合范围。
+站点资料统一在 `src/config/site.ts` 修改。发布文章需要补齐 Frontmatter，并放入对应的专栏目录：
+
+```text
+articles/
+├── flutter/<series>/
+├── ios/<series>/
+├── react/<series>/
+└── web3/<series>/
+```
+
+`src/content.config.ts` 会自动加载 `articles/**/*.md`，不需要再维护文件名白名单。目录表示内容归属，页面 URL 仍由 Frontmatter 中的 `slug` 决定，因此移动文章不会改变已发布链接。
 
 ## Docker
 
@@ -59,6 +69,25 @@ curl http://127.0.0.1/healthz
 ```bash
 sh scripts/rollback.sh
 ```
+
+### 服务端一键更新
+
+服务器首次配置部署参数：
+
+```bash
+cat > .env <<'EOF'
+SITE_URL=https://www.unclekui.site
+BLOG_PORT=8080
+EOF
+```
+
+后续每次发布只需在服务器项目目录执行：
+
+```bash
+sh scripts/server-deploy.sh
+```
+
+脚本会从 `origin/main` 快进拉取最新代码、构建并替换容器，然后检查本机健康端点。服务器存在未提交的源码修改或另一个部署仍在执行时，脚本会中止，避免覆盖修改或并发部署。
 
 ## 域名与 HTTPS
 

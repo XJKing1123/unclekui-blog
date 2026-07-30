@@ -1,0 +1,58 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { ArrowRight } from '@lucide/astro';
+import { COLUMNS, SERIES, type ColumnKey, type SeriesKey } from '../config/site';
+import { getColumnKey, getPublishedPosts } from '../lib/content';
+
+const posts = await getPublishedPosts();
+const tracks: Array<{
+  key: ColumnKey;
+  label: string;
+  stages: Array<{ title: string; description: string; series: SeriesKey[] }>;
+}> = [
+  {
+    key: 'flutter',
+    label: 'Flutter',
+    stages: [
+      { title: '语言与运行时', description: '先建立 Dart 执行模型、异步和运行时基础。', series: ['dart'] },
+      { title: '框架与状态', description: '理解三棵树、生命周期、状态和数据流。', series: ['framework-internals', 'state-management'] },
+      { title: '工程能力', description: '进入网络、架构、依赖、国际化和混合开发。', series: ['networking', 'engineering'] },
+      { title: '质量治理', description: '最后系统学习性能、稳定性、安全和故障闭环。', series: ['performance-reliability', 'security'] },
+    ],
+  },
+  { key: 'ios', label: 'iOS', stages: [{ title: 'iOS 工程实践', description: '围绕系统机制、架构、性能与平台工程逐步展开。', series: ['ios'] }] },
+  { key: 'react', label: 'React', stages: [{ title: 'React 工程实践', description: '从 JavaScript 执行模型进入渲染、状态和组件设计。', series: ['react'] }] },
+  { key: 'web3', label: 'Web3', stages: [{ title: 'Web3 工程实践', description: '从密码学、账本与共识进入 EVM 和链上交互。', series: ['web3'] }] },
+];
+---
+
+<BaseLayout title="知识地图" description="按前置关系和学习阶段组织 Flutter、iOS、React 与 Web3 技术文章。">
+  <header class="page-header">
+    <div class="container"><p class="eyebrow">Learning Map</p><h1>知识地图</h1><p>不按发布时间堆叠内容，而是沿着前置知识、核心机制和工程实践建立阅读路径。</p></div>
+  </header>
+  <div class="container knowledge-map">
+    {tracks.map((track) => {
+      const trackPosts = posts.filter((post) => getColumnKey(post.data.series) === track.key);
+      return (
+        <section class="knowledge-track" id={track.key}>
+          <div class="knowledge-track-heading">
+            <div><p class="eyebrow">{track.label} Path</p><h2>{COLUMNS[track.key].name}</h2><p>{COLUMNS[track.key].description}</p></div>
+            <a href={`/series/${track.key}`}>查看全部 {trackPosts.length} 篇 <ArrowRight size={15} aria-hidden="true" /></a>
+          </div>
+          <ol class="knowledge-stages">
+            {track.stages.map((stage, index) => {
+              const stagePosts = trackPosts.filter((post) => stage.series.includes(post.data.series as SeriesKey));
+              return (
+                <li class="knowledge-stage">
+                  <span class="stage-number">{String(index + 1).padStart(2, '0')}</span>
+                  <div><h3>{stage.title}</h3><p>{stage.description}</p><div class="stage-series">{stage.series.map((key) => <span>{SERIES[key].name}</span>)}</div></div>
+                  <strong>{stagePosts.length} 篇</strong>
+                </li>
+              );
+            })}
+          </ol>
+        </section>
+      );
+    })}
+  </div>
+</BaseLayout>

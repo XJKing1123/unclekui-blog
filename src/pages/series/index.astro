@@ -1,15 +1,15 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro';
-import { SERIES } from '../../config/site';
-import { getPublishedPosts } from '../../lib/content';
+import { COLUMNS } from '../../config/site';
+import { getColumnKey, getPublishedPosts } from '../../lib/content';
 const posts = await getPublishedPosts();
 ---
-<BaseLayout title="技术专栏" description="按主题和阅读顺序组织的 Flutter、iOS、React 与 Web3 技术专栏。">
+<BaseLayout title="技术专栏" description="按技术方向和阅读顺序组织的 Flutter、iOS、React 与 Web3 技术专栏。">
   <header class="page-header"><div class="container"><p class="eyebrow">Series</p><h1>技术专栏</h1><p>围绕一个问题域持续展开，按专栏顺序建立完整知识网络。</p></div></header>
   <div class="container home-section">
     <div class="series-grid">
-      {Object.entries(SERIES).map(([key, series]) => {
-        const count = posts.filter((post) => post.data.series === key).length;
+      {Object.entries(COLUMNS).map(([key, series]) => {
+        const count = posts.filter((post) => getColumnKey(post.data.series) === key).length;
         return <a class="series-card" href={`/series/${key}`}><div class="eyebrow">Series</div><h3>{series.name}</h3><p>{series.description}</p><span class="series-count">{count} 篇文章</span></a>;
       })}
     </div>

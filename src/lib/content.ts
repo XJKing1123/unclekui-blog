@@ -1,5 +1,5 @@
 import { getCollection, type CollectionEntry } from 'astro:content';
-import { SERIES, type SeriesKey } from '../config/site';
+import { COLUMNS, SERIES, type ColumnKey, type SeriesKey } from '../config/site';
 
 export type Post = CollectionEntry<'blog'>;
 
@@ -15,19 +15,13 @@ export function getSeriesMeta(series: string) {
   };
 }
 
-export function formatDate(date: Date) {
-  return new Intl.DateTimeFormat('zh-CN', {
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric',
-  }).format(date);
+export function getColumnKey(series: string): ColumnKey {
+  if (series === 'ios' || series === 'react' || series === 'web3') return series;
+  return 'flutter';
 }
 
-export function readingMinutes(body: string | undefined) {
-  if (!body) return 1;
-  const chinese = (body.match(/[\u3400-\u9fff]/g) ?? []).length;
-  const latin = (body.replace(/[\u3400-\u9fff]/g, ' ').match(/\b\w+\b/g) ?? []).length;
-  return Math.max(1, Math.ceil((chinese + latin) / 400));
+export function getColumnMeta(series: string) {
+  return COLUMNS[getColumnKey(series)];
 }
 
 export function tagHref(tag: string) {
