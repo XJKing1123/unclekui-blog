@@ -49,6 +49,7 @@ export async function initKnowledgeGraph() {
   let expandedSeries: string | null = null;
   let graph: any = null;
   let frame = 0;
+  let graphRevision = 0;
   let resizeObserver: ResizeObserver | null = null;
   let disposed = false;
   let lastClick = { id: '', time: 0 };
@@ -126,20 +127,22 @@ export async function initKnowledgeGraph() {
         group.add(ring);
       }
 
-      const dark = document.documentElement.dataset.theme === 'dark';
-      const sprite = new SpriteText(compactLabel(node));
-      sprite.textHeight = node.type === 'column' ? 7.2 : node.type === 'series' ? 5.4 : 3.25;
-      sprite.fontFace = 'Inter, PingFang SC, Microsoft YaHei, sans-serif';
-      sprite.fontWeight = node.type === 'article' ? '500' : '700';
-      sprite.color = dark ? '#f2f4f5' : '#17191c';
-      sprite.backgroundColor = dark ? 'rgba(23,26,29,.88)' : 'rgba(255,255,255,.9)';
-      sprite.borderColor = `${color}aa`;
-      sprite.borderWidth = node.type === 'article' ? .12 : .2;
-      sprite.borderRadius = 3;
-      sprite.padding = [1.1, .55];
-      sprite.position.y = node.type === 'column' ? 15 : node.type === 'series' ? 10 : 5.3;
-      group.add(sprite);
-      labelSprites.set(node.id, sprite);
+      if (node.type !== 'article') {
+        const dark = document.documentElement.dataset.theme === 'dark';
+        const sprite = new SpriteText(compactLabel(node));
+        sprite.textHeight = node.type === 'column' ? 7.2 : 5.4;
+        sprite.fontFace = 'Inter, PingFang SC, Microsoft YaHei, sans-serif';
+        sprite.fontWeight = '700';
+        sprite.color = dark ? '#f2f4f5' : '#17191c';
+        sprite.backgroundColor = dark ? 'rgba(23,26,29,.88)' : 'rgba(255,255,255,.9)';
+        sprite.borderColor = `${color}aa`;
+        sprite.borderWidth = .2;
+        sprite.borderRadius = 3;
+        sprite.padding = [1.1, .55];
+        sprite.position.y = node.type === 'column' ? 15 : 10;
+        group.add(sprite);
+        labelSprites.set(node.id, sprite);
+      }
       nodeObjects.set(node.id, group);
       return group;
     };
@@ -163,11 +166,11 @@ export async function initKnowledgeGraph() {
       .linkOpacity(0.76)
       .linkDirectionalArrowLength((link: RuntimeLink) => link.type === 'contains' ? 0 : 3)
       .linkDirectionalArrowRelPos(0.82)
-      .linkDirectionalParticles((link: RuntimeLink) => reducedMotion || link.type === 'contains' ? 0 : 1)
+      .linkDirectionalParticles((link: RuntimeLink) => reducedMotion || !selected || link.type === 'contains' || !isAdjacent(link, selected.id) ? 0 : 1)
       .linkDirectionalParticleWidth(1.35)
       .linkDirectionalParticleSpeed(0.003)
-      .cooldownTicks(mobile ? 70 : 110)
-      .d3AlphaDecay(0.035)
+      .cooldownTicks(mobile ? 40 : data.nodes.length > 100 ? 55 : 80)
+      .d3AlphaDecay(data.nodes.length > 100 ? 0.06 : 0.045)
       .d3VelocityDecay(0.42)
       .onNodeClick((node: PositionedNode) => {
         const now = performance.now();
@@ -194,7 +197,7 @@ export async function initKnowledgeGraph() {
         if (!selected) fitGraph();
       });
 
-    graph.renderer().setPixelRatio(Math.min(devicePixelRatio, mobile ? 1.35 : 1.75));
+    graph.renderer().setPixelRatio(Math.min(devicePixelRatio, mobile ? 1.25 : data.nodes.length > 100 ? 1.5 : 1.75));
     graph.scene().add(new THREE.AmbientLight(0xffffff, 1.55));
     const light = new THREE.DirectionalLight(0xffffff, 2.2);
     light.position.set(100, 80, 120);
@@ -206,7 +209,7 @@ export async function initKnowledgeGraph() {
       return endpointId(link.source) === id || endpointId(link.target) === id;
     }
 
-    function fitGraph() {
+    function fitGraph(duration = reducedMotion ? 0 : 520) {
       const nodes = graph.graphData().nodes.filter((node: PositionedNode) => node.x != null && node.y != null && node.z != null);
       if (nodes.length === 0) return;
       const xs = nodes.map((node: PositionedNode) => node.x as number);
@@ -226,7 +229,7 @@ export async function initKnowledgeGraph() {
       graph.cameraPosition(
         { x: center.x, y: center.y, z: center.z + distance },
         center,
-        reducedMotion ? 0 : 520,
+        duration,
       );
     }
 
@@ -265,6 +268,7 @@ export async function initKnowledgeGraph() {
     }
 
     function updateGraph() {
+      const revision = ++graphRevision;
       selected = null;
       hideDetail();
       disposeNodeDecorations();
@@ -277,6 +281,11 @@ export async function initKnowledgeGraph() {
         status.hidden = false;
         status.textContent = mobile && !expandedSeries ? '选择一个系列以展开文章' : '正在整理关系…';
       }
+      requestAnimationFrame(() => requestAnimationFrame(() => {
+        if (revision !== graphRevision || disposed) return;
+        fitGraph(0);
+        if (status) status.hidden = true;
+      }));
     }
 
     function focusNode(node: PositionedNode) {
@@ -295,6 +304,7 @@ export async function initKnowledgeGraph() {
       selected = node;
       graph.linkWidth(graph.linkWidth());
       graph.linkColor(graph.linkColor());
+      graph.linkDirectionalParticles(graph.linkDirectionalParticles());
       materials.forEach((material, id) => {
         const related = !node || id === node.id || data.links.some((link) => isAdjacent(link, node.id) && (link.source === id || link.target === id));
         material.opacity = related ? 0.96 : 0.18;
