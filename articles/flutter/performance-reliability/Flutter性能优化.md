@@ -7,6 +7,7 @@ tags: [Flutter, 性能优化, DevTools, Raster, 内存]
 series: performance-reliability
 order: 1
 slug: flutter-performance
+prerequisites: [flutter-frame-pipeline]
 draft: false
 ---
 

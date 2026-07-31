@@ -7,6 +7,7 @@ tags: [Flutter, 帧流水线, VSync, SchedulerBinding, Raster]
 series: rendering-painting
 order: 1
 slug: flutter-frame-pipeline
+prerequisites: [flutter-three-trees]
 draft: false
 ---
 

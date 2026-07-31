@@ -11,15 +11,19 @@
     "astro": "astro"
   },
   "dependencies": {
+    "3d-force-graph": "^1.80.0",
     "@astrojs/markdown-remark": "latest",
     "@astrojs/sitemap": "latest",
+    "@lucide/astro": "latest",
     "@pagefind/default-ui": "latest",
     "astro": "latest",
-    "@lucide/astro": "latest",
-    "mermaid": "latest"
+    "mermaid": "latest",
+    "three": "^0.185.1",
+    "three-spritetext": "^1.10.0"
   },
   "devDependencies": {
     "@astrojs/check": "latest",
+    "@types/three": "^0.185.1",
     "pagefind": "latest",
     "typescript": ">=6.0.0 <7.0.0"
   }

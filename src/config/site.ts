@@ -43,6 +43,10 @@ export const SERIES = {
     name: '网络与请求治理',
     description: '治理请求生命周期、认证刷新、重试、幂等性与弱网环境下的数据一致性。',
   },
+  media: {
+    name: '音视频与多媒体',
+    description: '理解播放器、采集、Texture、缓存与数字版权保护的完整媒体链路。',
+  },
   'framework-internals': {
     name: '框架原理',
     description: '从三棵树、渲染管线到混合开发，理解 Flutter 的运行机制。',
@@ -72,9 +76,9 @@ export const COLUMNS = {
     name: 'Flutter 工程实践',
     description: '深入 Flutter 框架原理、状态与数据流、性能、架构、安全和工程治理。',
   },
-  ios: SERIES.ios,
-  react: SERIES.react,
-  web3: SERIES.web3,
+  ios: { name: 'iOS 技术专栏', description: SERIES.ios.description },
+  react: { name: 'React 技术专栏', description: SERIES.react.description },
+  web3: { name: 'Web3 技术专栏', description: SERIES.web3.description },
 } as const;
 
 export type ColumnKey = keyof typeof COLUMNS;

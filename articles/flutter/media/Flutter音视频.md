@@ -7,6 +7,7 @@ tags: [Flutter, 音视频, Texture, 播放器, DRM]
 series: media
 order: 1
 slug: flutter-audio-video-architecture
+prerequisites: [flutter-app-lifecycle]
 draft: false
 ---
 
