@@ -19,6 +19,10 @@ export const SITE = {
 } as const;
 
 export const SERIES = {
+  experience: {
+    name: '经验之谈',
+    description: '用短篇复盘日常开发中的真实问题、排查思路、解决办法与工程取舍。',
+  },
   ios: {
     name: 'iOS 工程实践',
     description: '深入 Swift、UIKit、SwiftUI、系统运行机制、架构、性能、安全与 App 工程治理。',
@@ -72,6 +76,10 @@ export const SERIES = {
 export type SeriesKey = keyof typeof SERIES;
 
 export const COLUMNS = {
+  experience: {
+    name: '经验之谈',
+    description: '从开发现场出发，用通俗的语言讲清常见问题、技术难点和可执行的解决思路。',
+  },
   flutter: {
     name: 'Flutter 工程实践',
     description: '深入 Flutter 框架原理、状态与数据流、性能、架构、安全和工程治理。',

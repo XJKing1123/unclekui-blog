@@ -1,6 +1,6 @@
 # 奎叔技术笔记
 
-个人 Flutter、iOS、React 与 Web3 深度技术博客，基于 Astro、Pagefind、Mermaid 和 Nginx 构建。
+个人开发经验与 Flutter、iOS、React、Web3 深度技术博客，基于 Astro、Pagefind、Mermaid 和 Nginx 构建。
 
 ## 本地开发
 
@@ -23,11 +23,14 @@ pnpm run preview
 
 ```text
 articles/
+├── experience/flutter/
 ├── flutter/<series>/
 ├── ios/<series>/
 ├── react/<series>/
 └── web3/<series>/
 ```
+
+“经验之谈”文章当前以 Flutter 开发岗为主，统一放在 `articles/experience/flutter/`，Frontmatter 的 `series` 使用 `experience`。
 
 `src/content.config.ts` 会自动加载 `articles/**/*.md`，不需要再维护文件名白名单。目录表示内容归属，页面 URL 仍由 Frontmatter 中的 `slug` 决定，因此移动文章不会改变已发布链接。
 

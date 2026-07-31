@@ -16,7 +16,7 @@ export function getSeriesMeta(series: string) {
 }
 
 export function getColumnKey(series: string): ColumnKey {
-  if (series === 'ios' || series === 'react' || series === 'web3') return series;
+  if (series === 'experience' || series === 'ios' || series === 'react' || series === 'web3') return series;
   return 'flutter';
 }
 
