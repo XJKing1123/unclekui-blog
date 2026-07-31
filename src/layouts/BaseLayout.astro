@@ -8,9 +8,11 @@ interface Props {
   description?: string;
   image?: string;
   canonical?: string;
+  noCanonical?: boolean;
   type?: 'website' | 'article';
   publishedTime?: Date;
   updatedTime?: Date;
+  robots?: 'index,follow' | 'noindex,follow';
 }
 
 const {
@@ -18,16 +20,31 @@ const {
   description = SITE.description,
   image = '/og-default.png',
   canonical,
+  noCanonical = false,
   type = 'website',
   publishedTime,
   updatedTime,
+  robots = 'index,follow',
 } = Astro.props;
 
 const pageTitle = title ? `${title} · ${SITE.shortTitle}` : SITE.title;
-const canonicalUrl = canonical ? new URL(canonical, Astro.site) : new URL(Astro.url.pathname, Astro.site);
+const canonicalUrl = noCanonical ? undefined : new URL(canonical || Astro.url.pathname, Astro.site);
 const imageUrl = new URL(image, Astro.site);
 const currentPath = Astro.url.pathname;
-const isCurrentNavItem = (href: string) => href === '/' ? currentPath === '/' : currentPath === href || currentPath.startsWith(`${href}/`);
+const isCurrentNavItem = (href: string) => href === '/' ? currentPath === '/' : currentPath === href || currentPath.startsWith(href);
+const websiteJsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'WebSite',
+  name: SITE.title,
+  description: SITE.description,
+  url: new URL('/', Astro.site).toString(),
+  inLanguage: 'zh-CN',
+  author: {
+    '@type': 'Person',
+    name: SITE.author.name,
+    url: new URL('/about/', Astro.site).toString(),
+  },
+};
 ---
 
 <!doctype html>
@@ -37,14 +54,15 @@ const isCurrentNavItem = (href: string) => href === '/' ? currentPath === '/' : 
     <meta name="viewport" content="width=device-width" />
     <meta name="generator" content={Astro.generator} />
     <meta name="description" content={description} />
+    <meta name="robots" content={robots} />
     <meta name="theme-color" content="#10a37f" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    <link rel="canonical" href={canonicalUrl} />
+    {canonicalUrl && <link rel="canonical" href={canonicalUrl} />}
     <meta property="og:type" content={type} />
     <meta property="og:site_name" content={SITE.title} />
     <meta property="og:title" content={pageTitle} />
     <meta property="og:description" content={description} />
-    <meta property="og:url" content={canonicalUrl} />
+    {canonicalUrl && <meta property="og:url" content={canonicalUrl} />}
     <meta property="og:image" content={imageUrl} />
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content={pageTitle} />
@@ -53,6 +71,7 @@ const isCurrentNavItem = (href: string) => href === '/' ? currentPath === '/' : 
     {publishedTime && <meta property="article:published_time" content={publishedTime.toISOString()} />}
     {updatedTime && <meta property="article:modified_time" content={updatedTime.toISOString()} />}
     <title>{pageTitle}</title>
+    <script is:inline type="application/ld+json" set:html={JSON.stringify(websiteJsonLd)} />
     <script is:inline>
       (() => {
         const saved = localStorage.getItem('theme') || 'system';
@@ -75,7 +94,7 @@ const isCurrentNavItem = (href: string) => href === '/' ? currentPath === '/' : 
           ))}
         </nav>
         <div class="header-actions">
-          <a class="icon-link" href="/search" aria-label="搜索文章" title="搜索">
+          <a class="icon-link" href="/search/" aria-label="搜索文章" title="搜索">
             <Search size={17} stroke-width={1.8} />
           </a>
           <div class="theme-picker">
@@ -105,8 +124,8 @@ const isCurrentNavItem = (href: string) => href === '/' ? currentPath === '/' : 
       <div class="container footer-inner">
         <div>© {new Date().getFullYear()} {SITE.author.name} · 用事实、代码与测量记录工程实践</div>
         <nav class="footer-nav" aria-label="页脚导航">
-          <a href="/tags">标签</a>
-          <a href="/about">关于</a>
+          <a href="/tags/">标签</a>
+          <a href="/about/">关于</a>
           <a href={`mailto:${SITE.author.email}`}>联系</a>
         </nav>
       </div>

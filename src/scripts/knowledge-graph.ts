@@ -45,6 +45,7 @@ export async function initKnowledgeGraph() {
   const actionButtons = root.querySelectorAll<HTMLButtonElement>('[data-action]');
   const mobile = matchMedia('(max-width: 680px)').matches;
   const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const saveData = Boolean((navigator as Navigator & { connection?: { saveData?: boolean } }).connection?.saveData);
   let selected: PositionedNode | null = null;
   let expandedSeries: string | null = null;
   let graph: any = null;
@@ -72,7 +73,7 @@ export async function initKnowledgeGraph() {
 
   viewButtons.forEach((button) => button.addEventListener('click', () => showView(button.dataset.view === 'list' ? 'list' : 'graph')));
 
-  if (!container || !supportsWebGL() || (navigator.hardwareConcurrency ?? 4) <= 2) {
+  if (!container || mobile || saveData || !supportsWebGL() || (navigator.hardwareConcurrency ?? 4) <= 2) {
     showFallback('当前设备已切换到轻量列表视图。');
     return;
   }

@@ -10,7 +10,7 @@ const posts = await getPublishedPosts();
     <div class="series-grid">
       {Object.entries(COLUMNS).map(([key, series]) => {
         const count = posts.filter((post) => getColumnKey(post.data.series) === key).length;
-        return <a class="series-card" href={`/series/${key}`}><div class="eyebrow">Series</div><h3>{series.name}</h3><p>{series.description}</p><span class="series-count">{count} 篇文章</span></a>;
+        return <a class="series-card" href={`/series/${key}/`}><div class="eyebrow">Series</div><h3>{series.name}</h3><p>{series.description}</p><span class="series-count">{count} 篇文章</span></a>;
       })}
     </div>
   </div>

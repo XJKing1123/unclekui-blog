@@ -1,7 +1,7 @@
 ---
 import BaseLayout from './BaseLayout.astro';
 import TagChip from '../components/TagChip.astro';
-import { getColumnKey, getSeriesMeta, type Post } from '../lib/content';
+import { buildTagCounts, getPublishedPosts, getSeriesMeta, isIndexableTag, postHref, seriesHref, type Post } from '../lib/content';
 import { SITE } from '../config/site';
 
 interface Props {
@@ -14,7 +14,10 @@ interface Props {
 const { post, headings, previous, next } = Astro.props;
 const toc = headings.filter((heading) => heading.depth === 2 || heading.depth === 3);
 const series = getSeriesMeta(post.data.series);
-const canonical = `/posts/${post.data.slug}`;
+const canonical = postHref(post.data.slug);
+const tagCounts = buildTagCounts(await getPublishedPosts());
+const image = post.data.image ?? '/og-default.png';
+const pageUrl = new URL(canonical, Astro.site).toString();
 const jsonLd = {
   '@context': 'https://schema.org',
   '@type': 'TechArticle',
@@ -23,8 +26,22 @@ const jsonLd = {
   datePublished: post.data.publishDate.toISOString(),
   dateModified: post.data.updatedDate.toISOString(),
   inLanguage: 'zh-CN',
-  author: { '@type': 'Person', name: SITE.author.name },
-  mainEntityOfPage: new URL(canonical, Astro.site).toString(),
+  url: pageUrl,
+  image: new URL(image, Astro.site).toString(),
+  keywords: post.data.tags,
+  articleSection: series.name,
+  author: { '@type': 'Person', name: SITE.author.name, url: new URL('/about/', Astro.site).toString() },
+  publisher: { '@type': 'Person', name: SITE.author.name, url: new URL('/about/', Astro.site).toString() },
+  mainEntityOfPage: pageUrl,
+};
+const breadcrumbJsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'BreadcrumbList',
+  itemListElement: [
+    { '@type': 'ListItem', position: 1, name: '首页', item: new URL('/', Astro.site).toString() },
+    { '@type': 'ListItem', position: 2, name: series.name, item: new URL(seriesHref(post.data.series), Astro.site).toString() },
+    { '@type': 'ListItem', position: 3, name: post.data.title, item: pageUrl },
+  ],
 };
 ---
 
@@ -35,16 +52,18 @@ const jsonLd = {
   type="article"
   publishedTime={post.data.publishDate}
   updatedTime={post.data.updatedDate}
+  image={image}
 >
   <script is:inline type="application/ld+json" set:html={JSON.stringify(jsonLd)} />
+  <script is:inline type="application/ld+json" set:html={JSON.stringify(breadcrumbJsonLd)} />
   <div class="article-progress" id="article-progress" aria-hidden="true"></div>
   <header class="article-header">
     <div class="article-header-inner">
-      <div class="eyebrow"><a href={`/series/${getColumnKey(post.data.series)}`}>{series.name}</a></div>
+      <div class="eyebrow"><a href={seriesHref(post.data.series)}>{series.name}</a></div>
       <h1>{post.data.title}</h1>
       <p class="article-description">{post.data.description}</p>
       <div class="tags" style="margin-top: 1rem">
-        {post.data.tags.map((tag) => <TagChip tag={tag} />)}
+        {post.data.tags.map((tag) => <TagChip tag={tag} linked={isIndexableTag(tagCounts.get(tag))} />)}
       </div>
     </div>
   </header>
@@ -61,12 +80,12 @@ const jsonLd = {
       <slot />
       <nav class="post-navigation" aria-label="相邻文章">
         {previous ? (
-          <a href={`/posts/${previous.data.slug}`}>
+          <a href={postHref(previous.data.slug)}>
             <small>上一篇</small><span>{previous.data.title}</span>
           </a>
         ) : <span />}
         {next && (
-          <a href={`/posts/${next.data.slug}`}>
+          <a href={postHref(next.data.slug)}>
             <small>下一篇</small><span>{next.data.title}</span>
           </a>
         )}
@@ -82,12 +101,14 @@ const jsonLd = {
     )}
   </div>
   <script>
-    import mermaid from 'mermaid';
+    let mermaidPromise: Promise<typeof import('mermaid')> | undefined;
 
     async function renderMermaid() {
       const blocks = document.querySelectorAll<HTMLPreElement>('pre[data-language="mermaid"]');
       const rendered = document.querySelectorAll<HTMLElement>('.mermaid-frame[data-mermaid-source]');
       if (!blocks.length && !rendered.length) return;
+      mermaidPromise ??= import('mermaid');
+      const { default: mermaid } = await mermaidPromise;
       const dark = document.documentElement.dataset.theme === 'dark';
       mermaid.initialize({ startOnLoad: false, theme: dark ? 'dark' : 'neutral', securityLevel: 'strict' });
 

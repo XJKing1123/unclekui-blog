@@ -112,6 +112,12 @@ postsBySeries.forEach((nodes) => nodes.sort((a, b) => (a.order ?? 0) - (b.order 
   <script is:inline id="knowledge-graph-data" type="application/json" set:html={graphJson}></script>
   <script>
     import { initKnowledgeGraph } from '../scripts/knowledge-graph';
-    initKnowledgeGraph();
+
+    const start = () => initKnowledgeGraph();
+    if ('requestIdleCallback' in window) {
+      window.requestIdleCallback(start, { timeout: 1200 });
+    } else {
+      setTimeout(start, 0);
+    }
   </script>
 </BaseLayout>

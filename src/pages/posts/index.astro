@@ -1,8 +1,9 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import TagChip from '../../components/TagChip.astro';
-import { getColumnKey, getPublishedPosts, getSeriesMeta } from '../../lib/content';
+import { buildTagCounts, getColumnKey, getPublishedPosts, getSeriesMeta, isIndexableTag, postHref, seriesHref } from '../../lib/content';
 const posts = await getPublishedPosts();
+const tagCounts = buildTagCounts(posts);
 const seriesCount = new Set(posts.map((post) => getColumnKey(post.data.series))).size;
 ---
 <BaseLayout title="全部文章" description="奎叔技术笔记的全部 Flutter、iOS、React 与 Web3 技术文章。">
@@ -11,13 +12,13 @@ const seriesCount = new Set(posts.map((post) => getColumnKey(post.data.series)))
     {posts.map((post) => (
       <article class="post-row post-row--archive">
         <div class="post-row-content">
-          <h2><a href={`/posts/${post.data.slug}`}>{post.data.title}</a></h2>
+          <h2><a href={postHref(post.data.slug)}>{post.data.title}</a></h2>
           <p>{post.data.description}</p>
           <div class="post-row-footer">
-            <div class="tags">{post.data.tags.slice(0, 2).map((tag) => <TagChip tag={tag} />)}</div>
+            <div class="tags">{post.data.tags.slice(0, 2).map((tag) => <TagChip tag={tag} linked={isIndexableTag(tagCounts.get(tag))} />)}</div>
           </div>
         </div>
-        <a class="series-label" href={`/series/${getColumnKey(post.data.series)}`}>{getSeriesMeta(post.data.series).name}</a>
+        <a class="series-label" href={seriesHref(post.data.series)}>{getSeriesMeta(post.data.series).name}</a>
       </article>
     ))}
   </div>

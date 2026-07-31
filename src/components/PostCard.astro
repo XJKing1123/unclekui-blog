@@ -1,18 +1,18 @@
 ---
 import type { Post } from '../lib/content';
-import { getSeriesMeta } from '../lib/content';
+import { getSeriesMeta, isIndexableTag, postHref } from '../lib/content';
 import TagChip from './TagChip.astro';
 
-interface Props { post: Post }
-const { post } = Astro.props;
+interface Props { post: Post; tagCounts: Map<string, number> }
+const { post, tagCounts } = Astro.props;
 const meta = getSeriesMeta(post.data.series);
 ---
 
 <article class="post-card">
   <div class="eyebrow">{meta.name}</div>
-  <h3><a href={`/posts/${post.data.slug}`}>{post.data.title}</a></h3>
+  <h3><a href={postHref(post.data.slug)}>{post.data.title}</a></h3>
   <p>{post.data.description}</p>
   <div class="tags" style="margin-top: 1rem">
-    {post.data.tags.slice(0, 3).map((tag) => <TagChip tag={tag} />)}
+    {post.data.tags.slice(0, 3).map((tag) => <TagChip tag={tag} linked={isIndexableTag(tagCounts.get(tag))} />)}
   </div>
 </article>

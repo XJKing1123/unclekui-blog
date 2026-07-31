@@ -4,7 +4,7 @@ services:
     build:
       context: .
       args:
-        SITE_URL: ${SITE_URL:-http://localhost}
+        SITE_URL: ${SITE_URL:?SITE_URL is required}
     restart: unless-stopped
     ports:
       - "${BLOG_PORT:-80}:80"

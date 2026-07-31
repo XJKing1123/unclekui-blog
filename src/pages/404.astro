@@ -1,6 +1,6 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
 ---
-<BaseLayout title="页面未找到" description="请求的页面不存在。">
-  <div class="container empty-state"><p class="eyebrow">404</p><h1>这篇笔记不存在</h1><p>链接可能已更新，返回文章归档继续阅读。</p><p><a href="/posts">浏览全部文章</a></p></div>
+<BaseLayout title="页面未找到" description="请求的页面不存在。" noCanonical robots="noindex,follow">
+  <div class="container empty-state"><p class="eyebrow">404</p><h1>这篇笔记不存在</h1><p>链接可能已更新，返回文章归档继续阅读。</p><p><a href="/posts/">浏览全部文章</a></p></div>
 </BaseLayout>

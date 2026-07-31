@@ -1,20 +1,21 @@
 ---
 import type { GetStaticPaths } from 'astro';
 import BaseLayout from '../../layouts/BaseLayout.astro';
-import { getColumnKey, getPublishedPosts, getSeriesMeta } from '../../lib/content';
+import { buildTagCounts, getPublishedPosts, getSeriesMeta, isIndexableTag, postHref, seriesHref } from '../../lib/content';
 
 export const getStaticPaths = (async () => {
   const posts = await getPublishedPosts();
-  const tags = [...new Set(posts.flatMap((post) => post.data.tags))];
+  const counts = buildTagCounts(posts);
+  const tags = [...counts.entries()].filter(([, count]) => isIndexableTag(count)).map(([tag]) => tag);
   return tags.map((tag) => ({ params: { tag }, props: { posts: posts.filter((post) => post.data.tags.includes(tag)) } }));
 }) satisfies GetStaticPaths;
 
 const tag = Astro.params.tag!;
 const { posts } = Astro.props;
 ---
-<BaseLayout title={`标签：${tag}`} description={`包含“${tag}”标签的 Flutter 技术文章。`}>
+<BaseLayout title={`标签：${tag}`} description={`浏览奎叔技术笔记中与“${tag}”相关的技术文章、原理分析与工程实践。`}>
   <header class="page-header"><div class="container"><p class="eyebrow">Tag · {posts.length} articles</p><h1>{tag}</h1></div></header>
   <div class="container post-list">
-    {posts.map((post) => <article class="post-row post-row--compact"><h2><a href={`/posts/${post.data.slug}`}>{post.data.title}</a></h2><a class="series-label" href={`/series/${getColumnKey(post.data.series)}`}>{getSeriesMeta(post.data.series).name}</a></article>)}
+    {posts.map((post) => <article class="post-row post-row--compact"><h2><a href={postHref(post.data.slug)}>{post.data.title}</a></h2><a class="series-label" href={seriesHref(post.data.series)}>{getSeriesMeta(post.data.series).name}</a></article>)}
   </div>
 </BaseLayout>

@@ -11,10 +11,10 @@ export const SITE = {
   },
   nav: [
     { label: '首页', href: '/' },
-    { label: '专栏', href: '/series' },
-    { label: '知识地图', href: '/knowledge-map' },
-    { label: '文章', href: '/posts' },
-    { label: '关于', href: '/about' },
+    { label: '专栏', href: '/series/' },
+    { label: '知识地图', href: '/knowledge-map/' },
+    { label: '文章', href: '/posts/' },
+    { label: '关于', href: '/about/' },
   ],
 } as const;
 

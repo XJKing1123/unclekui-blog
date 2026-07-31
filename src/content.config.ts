@@ -14,6 +14,7 @@ const blog = defineCollection({
     order: z.number().int().positive(),
     slug: z.string().regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/),
     prerequisites: z.array(z.string().regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/)).default([]),
+    image: z.string().startsWith('/').optional(),
     draft: z.boolean(),
   }),
 });

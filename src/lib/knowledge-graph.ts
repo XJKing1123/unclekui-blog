@@ -64,7 +64,7 @@ export function buildKnowledgeGraph(posts: Post[]): KnowledgeGraphData {
     type: 'column',
     label: COLUMNS[column].name,
     column,
-    href: `/series/${column}`,
+    href: `/series/${column}/`,
     description: COLUMNS[column].description,
     articleCount: posts.filter((post) => getColumnKey(post.data.series) === column).length,
   }));
@@ -78,7 +78,7 @@ export function buildKnowledgeGraph(posts: Post[]): KnowledgeGraphData {
       label: meta.name,
       column,
       series: series as SeriesKey,
-      href: `/series/${series}`,
+      href: `/series/${column}/`,
       description: meta.description,
       articleCount: seriesPosts.length,
     });
@@ -92,7 +92,7 @@ export function buildKnowledgeGraph(posts: Post[]): KnowledgeGraphData {
         label: post.data.title,
         column,
         series: series as SeriesKey,
-        href: `/posts/${post.data.slug}`,
+        href: `/posts/${post.data.slug}/`,
         order: post.data.order,
         description: post.data.description,
         tags: post.data.tags.slice(0, 4),

@@ -1,7 +1,7 @@
 #!/usr/bin/env sh
 set -eu
 
-SITE_URL=${SITE_URL:-http://localhost}
+: "${SITE_URL:?SITE_URL is required, for example https://www.unclekui.site}"
 BLOG_PORT=${BLOG_PORT:-80}
 export SITE_URL BLOG_PORT
 

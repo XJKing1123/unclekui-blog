@@ -15,7 +15,7 @@ pnpm run dev
 
 ```bash
 pnpm run check
-pnpm run build
+SITE_URL=https://www.unclekui.site pnpm run build
 pnpm run preview
 ```
 
@@ -46,6 +46,17 @@ curl http://服务器IP/healthz
 ```bash
 BLOG_PORT=8080 SITE_URL=http://服务器IP:8080 docker compose up -d --build
 ```
+
+## 生成生产部署包
+
+部署包只包含构建和运行站点所需的源码、文章、静态资源与服务器脚本：
+
+```bash
+pnpm run package:deploy
+tar -tzf flutter-blog-deploy.tar.gz | head
+```
+
+解压后配置 `SITE_URL`，再使用 Docker Compose 构建。生产构建不会回退到 localhost。
 
 ## Ubuntu / Debian 首次部署
 

@@ -43,15 +43,15 @@ posts.forEach((post) => {
   </section>
 
   <section class="container home-section">
-    <div class="section-heading"><h2>最新文章</h2><a href="/posts">查看全部</a></div>
-    <div class="post-grid">{latest.map((post) => <PostCard post={post} />)}</div>
+    <div class="section-heading"><h2>最新文章</h2><a href="/posts/">查看全部</a></div>
+    <div class="post-grid">{latest.map((post) => <PostCard post={post} tagCounts={tagCounts} />)}</div>
   </section>
 
   <section class="container home-section">
-    <div class="section-heading"><h2>技术专栏</h2><a href="/series">按顺序阅读</a></div>
+    <div class="section-heading"><h2>技术专栏</h2><a href="/series/">按顺序阅读</a></div>
     <div class="series-grid">
       {Object.entries(COLUMNS).map(([key, series]) => (
-        <a class="series-card" href={`/series/${key}`}>
+        <a class="series-card" href={`/series/${key}/`}>
           <div class="eyebrow">Series</div><h3>{series.name}</h3><p>{series.description}</p>
           <span class="series-count">{seriesCounts.get(key) ?? 0} 篇文章</span>
         </a>
@@ -60,7 +60,7 @@ posts.forEach((post) => {
   </section>
 
   <section class="container home-section">
-    <div class="section-heading"><h2>热门标签</h2><a href="/tags">全部标签</a></div>
+    <div class="section-heading"><h2>热门标签</h2><a href="/tags/">全部标签</a></div>
     <div class="tag-cloud">{popularTags.map(([tag, count]) => <TagChip tag={tag} count={count} />)}</div>
   </section>
 </BaseLayout>

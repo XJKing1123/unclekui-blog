@@ -1,13 +1,12 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import TagChip from '../../components/TagChip.astro';
-import { getPublishedPosts } from '../../lib/content';
+import { buildTagCounts, getPublishedPosts, isIndexableTag } from '../../lib/content';
 const posts = await getPublishedPosts();
-const tags = new Map<string, number>();
-posts.forEach((post) => post.data.tags.forEach((tag) => tags.set(tag, (tags.get(tag) ?? 0) + 1)));
-const sorted = [...tags.entries()].sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0], 'zh-CN'));
+const tags = buildTagCounts(posts);
+const sorted = [...tags.entries()].filter(([, count]) => isIndexableTag(count)).sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0], 'zh-CN'));
 ---
-<BaseLayout title="标签" description="按技术标签浏览 Flutter 文章。">
+<BaseLayout title="标签" description="按核心技术主题浏览 Flutter、iOS、React 与 Web3 文章。">
   <header class="page-header"><div class="container"><p class="eyebrow">Topics</p><h1>标签</h1><p>从具体技术概念进入相关文章。</p></div></header>
   <div class="container tag-cloud">{sorted.map(([tag, count]) => <TagChip tag={tag} count={count} />)}</div>
 </BaseLayout>

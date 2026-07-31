@@ -6,7 +6,7 @@ COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
 RUN pnpm install --frozen-lockfile
 
 COPY . .
-ARG SITE_URL=http://localhost
+ARG SITE_URL
 ENV BLOG_SITE_URL=$SITE_URL
 RUN pnpm run build
 

@@ -2,7 +2,7 @@
 import type { GetStaticPaths } from 'astro';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import { COLUMNS, type ColumnKey } from '../../config/site';
-import { getColumnKey, getPublishedPosts } from '../../lib/content';
+import { getColumnKey, getPublishedPosts, postHref } from '../../lib/content';
 
 export const getStaticPaths = (async () => {
   const posts = await getPublishedPosts();
@@ -20,7 +20,7 @@ const meta = COLUMNS[series as ColumnKey];
   <header class="page-header"><div class="container"><p class="eyebrow">Series · {posts.length} articles</p><h1>{meta.name}</h1><p>{meta.description}</p></div></header>
   <div class="container post-list">
     {posts.map((post, index) => (
-      <article class="post-row post-row--series"><span class="series-order">{String(index + 1).padStart(2, '0')}</span><h2><a href={`/posts/${post.data.slug}`}>{post.data.title}</a></h2></article>
+      <article class="post-row post-row--series"><span class="series-order">{String(index + 1).padStart(2, '0')}</span><h2><a href={postHref(post.data.slug)}>{post.data.title}</a></h2></article>
     ))}
   </div>
 </BaseLayout>

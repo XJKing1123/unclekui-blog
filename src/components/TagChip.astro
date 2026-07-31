@@ -1,6 +1,8 @@
 ---
 import { tagHref } from '../lib/content';
-interface Props { tag: string; count?: number }
-const { tag, count } = Astro.props;
+interface Props { tag: string; count?: number; linked?: boolean }
+const { tag, count, linked = true } = Astro.props;
 ---
-<a class="tag" href={tagHref(tag)}>{tag}{count ? ` · ${count}` : ''}</a>
+{linked
+  ? <a class="tag" href={tagHref(tag)}>{tag}{count ? ` · ${count}` : ''}</a>
+  : <span class="tag">{tag}{count ? ` · ${count}` : ''}</span>}
